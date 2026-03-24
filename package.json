@@ -1,5 +1,5 @@
 {
-  "name": "mariadb-mcp-server",
+  "name": "@cemalturkcan/mariadb-mcp-server",
   "version": "1.0.0",
   "description": "MCP server for MariaDB/MySQL with per-connection read/write access control",
   "type": "module",
@@ -44,6 +44,9 @@
   },
   "devDependencies": {
     "semantic-release": "^24.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "release": {
     "branches": [
