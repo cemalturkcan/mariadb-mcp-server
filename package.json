@@ -1,11 +1,11 @@
 {
-  "name": "@cemalturkcan/mariadb-mcp-server",
+  "name": "@cemalturkcann/mariadb-mcp-server",
   "version": "1.0.0",
   "description": "MCP server for MariaDB/MySQL with per-connection read/write access control",
   "type": "module",
   "main": "src/index.js",
   "bin": {
-    "mariadb-mcp-server": "./src/index.js"
+    "mariadb-mcp-server": "src/index.js"
   },
   "files": [
     "src",
