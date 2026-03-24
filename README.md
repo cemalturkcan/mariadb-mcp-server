@@ -116,19 +116,17 @@ Add to `~/.claude.json`:
 
 ### OpenCode
 
-Add to your project-level `.opencode.json`:
+Add to your `opencode.json`:
 
 ```json
 {
-  "mcpServers": {
+  "mcp": {
     "mariadb": {
       "type": "local",
-      "command": "npx -y @cemalturkcann/mariadb-mcp-server",
+      "command": ["npx", "-y", "@cemalturkcann/mariadb-mcp-server"],
       "environment": {
         "DB_MCP_CONFIG_PATH": "/path/to/config.json"
-      },
-      "enabled": true,
-      "timeout": 60000
+      }
     }
   }
 }

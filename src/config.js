@@ -50,9 +50,14 @@ const DEFAULT_CONFIG = {
   },
 };
 
-function getXdgConfigPath() {
-  const xdgBase = process.env.XDG_CONFIG_HOME || join(homedir(), ".config");
-  return join(xdgBase, "mariadb-mcp", "config.json");
+function getDefaultConfigPath() {
+  if (process.env.XDG_CONFIG_HOME) {
+    return join(process.env.XDG_CONFIG_HOME, "mariadb-mcp", "config.json");
+  }
+  if (process.platform === "win32" && process.env.APPDATA) {
+    return join(process.env.APPDATA, "mariadb-mcp", "config.json");
+  }
+  return join(homedir(), ".config", "mariadb-mcp", "config.json");
 }
 
 function createDefaultConfig(configPath) {
@@ -70,13 +75,13 @@ function createDefaultConfig(configPath) {
 }
 
 export function loadConfig() {
-  const xdgPath = getXdgConfigPath();
+  const defaultPath = getDefaultConfigPath();
 
   const candidates = [
     process.env.DB_MCP_CONFIG_PATH,
     join(__dirname, "../config.json"),
     join(process.cwd(), "config.json"),
-    xdgPath,
+    defaultPath,
   ].filter(Boolean);
 
   let rawConfig;
@@ -88,7 +93,7 @@ export function loadConfig() {
   }
 
   if (!rawConfig) {
-    rawConfig = createDefaultConfig(xdgPath);
+    rawConfig = createDefaultConfig(defaultPath);
   }
 
   const raw = rawConfig.connections || rawConfig.databases;
