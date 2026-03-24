@@ -96,6 +96,8 @@ Example config:
 
 ## MCP Client Setup
 
+On first run, a default config is created automatically at `~/.config/mariadb-mcp/config.json` (Linux/macOS) or `%APPDATA%\mariadb-mcp\config.json` (Windows). Edit it to add your connections.
+
 ### Claude Code
 
 Add to `~/.claude.json`:
@@ -105,10 +107,7 @@ Add to `~/.claude.json`:
   "mcpServers": {
     "mariadb": {
       "command": "npx",
-      "args": ["-y", "@cemalturkcann/mariadb-mcp-server"],
-      "env": {
-        "DB_MCP_CONFIG_PATH": "/path/to/config.json"
-      }
+      "args": ["-y", "@cemalturkcann/mariadb-mcp-server"]
     }
   }
 }
@@ -123,10 +122,7 @@ Add to your `opencode.json`:
   "mcp": {
     "mariadb": {
       "type": "local",
-      "command": ["npx", "-y", "@cemalturkcann/mariadb-mcp-server"],
-      "environment": {
-        "DB_MCP_CONFIG_PATH": "/path/to/config.json"
-      }
+      "command": ["npx", "-y", "@cemalturkcann/mariadb-mcp-server"]
     }
   }
 }
@@ -134,7 +130,7 @@ Add to your `opencode.json`:
 
 ### Other MCP Clients
 
-Any MCP-compatible client can use this server. The binary name is `mariadb-mcp-server` and it communicates over stdio. Point `DB_MCP_CONFIG_PATH` to your config file.
+Any MCP-compatible client can use this server. The binary name is `mariadb-mcp-server` and it communicates over stdio. To use a custom config path, set `DB_MCP_CONFIG_PATH`.
 
 ## License
 
