@@ -1,5 +1,6 @@
-import { existsSync, readFileSync } from "fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
 import { dirname, join } from "path";
+import { homedir } from "os";
 import { fileURLToPath } from "url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -34,11 +35,48 @@ function normalizeConnection(connection) {
   };
 }
 
+const DEFAULT_CONFIG = {
+  connections: {
+    local: {
+      host: "localhost",
+      port: 3306,
+      user: "root",
+      password: "",
+      database: "",
+      description: "Local MariaDB",
+      read: true,
+      write: false,
+    },
+  },
+};
+
+function getXdgConfigPath() {
+  const xdgBase = process.env.XDG_CONFIG_HOME || join(homedir(), ".config");
+  return join(xdgBase, "mariadb-mcp", "config.json");
+}
+
+function createDefaultConfig(configPath) {
+  const dir = dirname(configPath);
+  mkdirSync(dir, { recursive: true });
+  writeFileSync(
+    configPath,
+    JSON.stringify(DEFAULT_CONFIG, null, 2) + "\n",
+    "utf8",
+  );
+  process.stderr.write(
+    `[mariadb-mcp] Created default config at ${configPath}\n`,
+  );
+  return DEFAULT_CONFIG;
+}
+
 export function loadConfig() {
+  const xdgPath = getXdgConfigPath();
+
   const candidates = [
     process.env.DB_MCP_CONFIG_PATH,
     join(__dirname, "../config.json"),
     join(process.cwd(), "config.json"),
+    xdgPath,
   ].filter(Boolean);
 
   let rawConfig;
@@ -50,15 +88,13 @@ export function loadConfig() {
   }
 
   if (!rawConfig) {
-    throw new Error(
-      "config.json bulunamadi. DB_MCP_CONFIG_PATH ayarlayin veya proje kokune config.json koyun."
-    );
+    rawConfig = createDefaultConfig(xdgPath);
   }
 
   const raw = rawConfig.connections || rawConfig.databases;
   if (!raw || typeof raw !== "object") {
     throw new Error(
-      "config.json icinde 'connections' (veya eski format 'databases') nesnesi olmalidir."
+      "config.json icinde 'connections' (veya eski format 'databases') nesnesi olmalidir.",
     );
   }
 
@@ -81,7 +117,7 @@ export function loadConfig() {
       normalized.default_row_limit > normalized.max_row_limit
     ) {
       throw new Error(
-        `'${name}' icin default_row_limit, max_row_limit degerinden buyuk olamaz.`
+        `'${name}' icin default_row_limit, max_row_limit degerinden buyuk olamaz.`,
       );
     }
 

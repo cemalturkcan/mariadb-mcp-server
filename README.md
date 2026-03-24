@@ -13,18 +13,27 @@ MCP (Model Context Protocol) server for MariaDB/MySQL databases. Provides AI ass
 ## Installation
 
 ```bash
-npm install -g mariadb-mcp-server
+npm install -g @cemalturkcann/mariadb-mcp-server
 ```
 
 Or use directly with npx:
 
 ```bash
-npx mariadb-mcp-server
+npx @cemalturkcann/mariadb-mcp-server
 ```
 
 ## Configuration
 
-Create a `config.json` next to the package (or set `DB_MCP_CONFIG_PATH` env var):
+The server looks for `config.json` in this order:
+
+1. `DB_MCP_CONFIG_PATH` environment variable
+2. Next to the package (`../config.json` relative to `src/`)
+3. Current working directory
+4. `~/.config/mariadb-mcp/config.json`
+
+If no config is found, a default one is created automatically at `~/.config/mariadb-mcp/config.json` with a local read-only connection.
+
+Example config:
 
 ```json
 {
@@ -57,51 +66,77 @@ Create a `config.json` next to the package (or set `DB_MCP_CONFIG_PATH` env var)
 
 ### Connection options
 
-| Field | Type | Default | Description |
-|-------|------|---------|-------------|
-| `host` | string | `localhost` | Database host |
-| `port` | number | `3306` | Database port |
-| `user` | string | `root` | Database user |
-| `password` | string | `""` | Database password |
-| `database` | string | `""` | Default database |
-| `description` | string | `""` | Human-readable label |
-| `read` | boolean | `true` | Allow read queries |
-| `write` | boolean | `false` | Allow write queries |
-| `ssl` | boolean/object | `false` | SSL configuration |
-| `statement_timeout_ms` | number | *none* | Connection timeout (0 or omit = unlimited) |
-| `default_row_limit` | number | *none* | Default LIMIT for SELECT (0 or omit = unlimited) |
-| `max_row_limit` | number | *none* | Max allowed LIMIT (0 or omit = unlimited) |
+| Field                  | Type           | Default     | Description                                      |
+| ---------------------- | -------------- | ----------- | ------------------------------------------------ |
+| `host`                 | string         | `localhost` | Database host                                    |
+| `port`                 | number         | `3306`      | Database port                                    |
+| `user`                 | string         | `root`      | Database user                                    |
+| `password`             | string         | `""`        | Database password                                |
+| `database`             | string         | `""`        | Default database                                 |
+| `description`          | string         | `""`        | Human-readable label                             |
+| `read`                 | boolean        | `true`      | Allow read queries                               |
+| `write`                | boolean        | `false`     | Allow write queries                              |
+| `ssl`                  | boolean/object | `false`     | SSL configuration                                |
+| `statement_timeout_ms` | number         | _none_      | Connection timeout (0 or omit = unlimited)       |
+| `default_row_limit`    | number         | _none_      | Default LIMIT for SELECT (0 or omit = unlimited) |
+| `max_row_limit`        | number         | _none_      | Max allowed LIMIT (0 or omit = unlimited)        |
 
 ## MCP Tools
 
-| Tool | Description | Requires |
-|------|-------------|----------|
-| `list_connections` | List all configured connections | — |
-| `list_databases` | Show databases on a connection | `read` |
-| `list_tables` | Show tables (optionally in a specific database) | `read` |
-| `describe_table` | Show column definitions | `read` |
-| `execute_select` | Run SELECT/SHOW/DESCRIBE/EXPLAIN queries | `read` |
-| `execute_write` | Run INSERT/UPDATE/DELETE/DDL queries | `write` |
-| `execute_transaction` | Run multiple write queries atomically | `write` |
-| `suggest_query` | Suggest a query for manual review | — |
+| Tool                  | Description                                     | Requires |
+| --------------------- | ----------------------------------------------- | -------- |
+| `list_connections`    | List all configured connections                 | —        |
+| `list_databases`      | Show databases on a connection                  | `read`   |
+| `list_tables`         | Show tables (optionally in a specific database) | `read`   |
+| `describe_table`      | Show column definitions                         | `read`   |
+| `execute_select`      | Run SELECT / SHOW / DESCRIBE / EXPLAIN queries  | `read`   |
+| `execute_write`       | Run INSERT / UPDATE / DELETE / DDL queries      | `write`  |
+| `execute_transaction` | Run multiple write queries atomically           | `write`  |
+| `suggest_query`       | Suggest a query for manual review               | —        |
 
-## Claude Desktop / MCP Client Setup
+## MCP Client Setup
 
-Add to your MCP client config:
+### Claude Code
+
+Add to `~/.claude.json`:
 
 ```json
 {
   "mcpServers": {
     "mariadb": {
       "command": "npx",
-      "args": ["-y", "mariadb-mcp-server"],
+      "args": ["-y", "@cemalturkcann/mariadb-mcp-server"],
       "env": {
-        "DB_MCP_CONFIG_PATH": "/path/to/your/config.json"
+        "DB_MCP_CONFIG_PATH": "/path/to/config.json"
       }
     }
   }
 }
 ```
+
+### OpenCode
+
+Add to your project-level `.opencode.json`:
+
+```json
+{
+  "mcpServers": {
+    "mariadb": {
+      "type": "local",
+      "command": "npx -y @cemalturkcann/mariadb-mcp-server",
+      "environment": {
+        "DB_MCP_CONFIG_PATH": "/path/to/config.json"
+      },
+      "enabled": true,
+      "timeout": 60000
+    }
+  }
+}
+```
+
+### Other MCP Clients
+
+Any MCP-compatible client can use this server. The binary name is `mariadb-mcp-server` and it communicates over stdio. Point `DB_MCP_CONFIG_PATH` to your config file.
 
 ## License
 
