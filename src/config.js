@@ -1,0 +1,92 @@
+import { existsSync, readFileSync } from "fs";
+import { dirname, join } from "path";
+import { fileURLToPath } from "url";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+
+function toPositiveInt(value, fallback) {
+  const n = Number(value);
+  if (!Number.isFinite(n) || n <= 0) return fallback;
+  return Math.floor(n);
+}
+
+function toNonNegativeInt(value) {
+  if (value == null) return 0;
+  const n = Number(value);
+  if (!Number.isFinite(n) || n < 0) return 0;
+  return Math.floor(n);
+}
+
+function normalizeConnection(connection) {
+  return {
+    host: connection.host || "localhost",
+    port: toPositiveInt(connection.port, 3306),
+    user: connection.user || "root",
+    password: connection.password || "",
+    database: connection.database || "",
+    description: connection.description || "",
+    read: connection.read !== false,
+    write: connection.write === true,
+    statement_timeout_ms: toNonNegativeInt(connection.statement_timeout_ms),
+    default_row_limit: toNonNegativeInt(connection.default_row_limit),
+    max_row_limit: toNonNegativeInt(connection.max_row_limit),
+    ssl: connection.ssl || false,
+  };
+}
+
+export function loadConfig() {
+  const candidates = [
+    process.env.DB_MCP_CONFIG_PATH,
+    join(__dirname, "../config.json"),
+    join(process.cwd(), "config.json"),
+  ].filter(Boolean);
+
+  let rawConfig;
+  for (const configPath of candidates) {
+    if (existsSync(configPath)) {
+      rawConfig = JSON.parse(readFileSync(configPath, "utf8"));
+      break;
+    }
+  }
+
+  if (!rawConfig) {
+    throw new Error(
+      "config.json bulunamadi. DB_MCP_CONFIG_PATH ayarlayin veya proje kokune config.json koyun."
+    );
+  }
+
+  const raw = rawConfig.connections || rawConfig.databases;
+  if (!raw || typeof raw !== "object") {
+    throw new Error(
+      "config.json icinde 'connections' (veya eski format 'databases') nesnesi olmalidir."
+    );
+  }
+
+  const entries = Object.entries(raw);
+  if (entries.length === 0) {
+    throw new Error("En az bir baglanti tanimlamalisiniz.");
+  }
+
+  const connections = {};
+  for (const [name, connection] of entries) {
+    if (!connection || typeof connection !== "object") {
+      throw new Error(`'${name}' baglantisi gecersiz.`);
+    }
+
+    const normalized = normalizeConnection(connection);
+
+    if (
+      normalized.default_row_limit > 0 &&
+      normalized.max_row_limit > 0 &&
+      normalized.default_row_limit > normalized.max_row_limit
+    ) {
+      throw new Error(
+        `'${name}' icin default_row_limit, max_row_limit degerinden buyuk olamaz.`
+      );
+    }
+
+    connections[name] = normalized;
+  }
+
+  return { connections };
+}

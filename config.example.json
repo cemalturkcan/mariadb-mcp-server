@@ -1,0 +1,27 @@
+{
+  "connections": {
+    "local": {
+      "host": "localhost",
+      "port": 3306,
+      "user": "root",
+      "password": "",
+      "database": "",
+      "description": "Local MariaDB",
+      "read": true,
+      "write": true
+    },
+    "production": {
+      "host": "db.example.com",
+      "port": 3306,
+      "user": "readonly_user",
+      "password": "secret",
+      "database": "mydb",
+      "description": "Production (read-only)",
+      "read": true,
+      "write": false,
+      "statement_timeout_ms": 5000,
+      "default_row_limit": 50,
+      "max_row_limit": 500
+    }
+  }
+}

@@ -1,0 +1,6 @@
+node_modules/
+config.json
+.npmrc
+.idea/
+*.log
+.DS_Store

@@ -1,0 +1,59 @@
+{
+  "name": "mariadb-mcp-server",
+  "version": "1.0.0",
+  "description": "MCP server for MariaDB/MySQL with per-connection read/write access control",
+  "type": "module",
+  "main": "src/index.js",
+  "bin": {
+    "mariadb-mcp-server": "./src/index.js"
+  },
+  "files": [
+    "src",
+    "config.example.json",
+    "README.md"
+  ],
+  "scripts": {
+    "start": "node src/index.js",
+    "check": "node --check src/index.js && node --check src/config.js && node --check src/db.js && node --check src/sqlGuard.js && node --check src/tools.js"
+  },
+  "keywords": [
+    "mcp",
+    "mariadb",
+    "mysql",
+    "model-context-protocol",
+    "database",
+    "ai",
+    "llm",
+    "claude"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cemalturkcan/mariadb-mcp-server.git"
+  },
+  "homepage": "https://github.com/cemalturkcan/mariadb-mcp-server#readme",
+  "bugs": {
+    "url": "https://github.com/cemalturkcan/mariadb-mcp-server/issues"
+  },
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "mariadb": "^3.3.0"
+  },
+  "devDependencies": {
+    "semantic-release": "^24.0.0"
+  },
+  "release": {
+    "branches": [
+      "main"
+    ],
+    "plugins": [
+      "@semantic-release/commit-analyzer",
+      "@semantic-release/release-notes-generator",
+      "@semantic-release/npm",
+      "@semantic-release/github"
+    ]
+  }
+}
