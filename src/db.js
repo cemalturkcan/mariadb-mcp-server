@@ -1,4 +1,4 @@
-import mariadb from "mariadb";
+import { createPool } from "mariadb";
 
 export class DbManager {
   constructor(config) {
@@ -12,13 +12,13 @@ export class DbManager {
 
   getReadableConnections() {
     return this.getConnectionNames().filter(
-      (name) => this.config.connections[name].read
+      (name) => this.config.connections[name].read,
     );
   }
 
   getWritableConnections() {
     return this.getConnectionNames().filter(
-      (name) => this.config.connections[name].write
+      (name) => this.config.connections[name].write,
     );
   }
 
@@ -27,7 +27,7 @@ export class DbManager {
     if (!cfg) {
       const available = this.getConnectionNames().join(", ");
       throw new Error(
-        `Baglanti bulunamadi: '${name}'. Mevcut baglantilar: ${available}`
+        `Baglanti bulunamadi: '${name}'. Mevcut baglantilar: ${available}`,
       );
     }
     return cfg;
@@ -59,7 +59,7 @@ export class DbManager {
           typeof c.ssl === "object" ? c.ssl : { rejectUnauthorized: false };
       }
 
-      this.pools.set(poolKey, mariadb.createPool(poolOptions));
+      this.pools.set(poolKey, createPool(poolOptions));
     }
 
     return this.pools.get(poolKey);
@@ -69,7 +69,7 @@ export class DbManager {
     const cfg = this.getConnectionConfig(connectionName);
     if (!cfg.read) {
       throw new Error(
-        `'${connectionName}' baglantisi read (okuma) izni vermiyor.`
+        `'${connectionName}' baglantisi read (okuma) izni vermiyor.`,
       );
     }
   }
@@ -78,7 +78,7 @@ export class DbManager {
     const cfg = this.getConnectionConfig(connectionName);
     if (!cfg.write) {
       throw new Error(
-        `'${connectionName}' baglantisi write (yazma) izni vermiyor.`
+        `'${connectionName}' baglantisi write (yazma) izni vermiyor.`,
       );
     }
   }
@@ -134,7 +134,7 @@ export class DbManager {
         /* asil hatayi koruyoruz */
       }
       throw new Error(
-        `Transaction basarisiz, rollback yapildi: ${error.message}`
+        `Transaction basarisiz, rollback yapildi: ${error.message}`,
       );
     } finally {
       conn.release();
