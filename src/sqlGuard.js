@@ -28,17 +28,17 @@ export function isWriteQuery(sql) {
 
 export function validateReadQuery(rawQuery) {
   if (typeof rawQuery !== "string") {
-    throw new Error("Sorgu metin (string) olmalidir.");
+    throw new Error("Query must be a string.");
   }
 
   const query = rawQuery.trim();
   if (!query) {
-    throw new Error("Sorgu bos olamaz.");
+    throw new Error("Query must not be empty.");
   }
 
   if (!isReadQuery(query)) {
     throw new Error(
-      "Yalnizca SELECT/SHOW/DESCRIBE/EXPLAIN sorgularina izin verilir."
+      "Only SELECT/SHOW/DESCRIBE/EXPLAIN queries are allowed."
     );
   }
 
@@ -47,23 +47,23 @@ export function validateReadQuery(rawQuery) {
 
 export function validateWriteQuery(rawQuery) {
   if (typeof rawQuery !== "string") {
-    throw new Error("Sorgu metin (string) olmalidir.");
+    throw new Error("Query must be a string.");
   }
 
   const query = rawQuery.trim();
   if (!query) {
-    throw new Error("Sorgu bos olamaz.");
+    throw new Error("Query must not be empty.");
   }
 
   if (isReadQuery(query)) {
     throw new Error(
-      "Read-only sorgular (SELECT/SHOW/DESCRIBE/EXPLAIN) execute_write'da kullanilamaz. execute_select kullanin."
+      "Read-only queries (SELECT/SHOW/DESCRIBE/EXPLAIN) cannot be used with execute_write. Use execute_select instead."
     );
   }
 
   if (!isWriteQuery(query)) {
     throw new Error(
-      `Sorgu gecerli bir yazma islemi olarak taninamadi. Izin verilen: ${WRITE_PREFIXES.join(", ")}`
+      `Query was not recognized as a valid write operation. Allowed prefixes: ${WRITE_PREFIXES.join(", ")}`
     );
   }
 
@@ -74,9 +74,9 @@ export function validateWriteQuery(rawQuery) {
  * Resolves the effective row limit for a query.
  * Returns null when no limit should be applied.
  *
- * - Config'de default_row_limit / max_row_limit yoksa (0) → sinirsiz
- * - Kullanici row_limit verdiyse ve max_row_limit varsa → min(request, max) uygulanir
- * - Kullanici row_limit vermediyse ama default_row_limit varsa → default uygulanir
+ * - If default_row_limit / max_row_limit are absent (0) → unlimited
+ * - If the caller provides row_limit and max_row_limit is set → min(requested, max) is used
+ * - If the caller omits row_limit but default_row_limit is set → default is used
  */
 export function resolveRowLimit(requestedRowLimit, connectionConfig) {
   const defaultLimit = connectionConfig.default_row_limit || 0;
@@ -85,7 +85,7 @@ export function resolveRowLimit(requestedRowLimit, connectionConfig) {
   if (requestedRowLimit != null) {
     const n = Number(requestedRowLimit);
     if (!Number.isFinite(n) || n <= 0) {
-      throw new Error("row_limit pozitif bir sayi olmalidir.");
+      throw new Error("row_limit must be a positive number.");
     }
     const chosen = Math.floor(n);
     return maxLimit > 0 ? Math.min(chosen, maxLimit) : chosen;

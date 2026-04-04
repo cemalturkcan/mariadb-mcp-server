@@ -66,14 +66,14 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
       case "list_databases": {
         const connection = args?.connection;
-        if (!connection) return fail("'connection' alani zorunludur.");
+        if (!connection) return fail("'connection' field is required.");
         const rows = await db.runReadOnly(connection, "SHOW DATABASES");
         return ok(rows);
       }
 
       case "list_tables": {
         const { connection, database } = args || {};
-        if (!connection) return fail("'connection' alani zorunludur.");
+        if (!connection) return fail("'connection' field is required.");
         const sql = database
           ? `SHOW TABLES FROM \`${database}\``
           : "SHOW TABLES";
@@ -83,8 +83,8 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
       case "describe_table": {
         const { connection, table, database } = args || {};
-        if (!connection) return fail("'connection' alani zorunludur.");
-        if (!table) return fail("'table' alani zorunludur.");
+        if (!connection) return fail("'connection' field is required.");
+        if (!table) return fail("'table' field is required.");
         const path = database ? `\`${database}\`.\`${table}\`` : `\`${table}\``;
         const rows = await db.runReadOnly(connection, `DESCRIBE ${path}`);
         return ok(rows);
@@ -96,8 +96,8 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         const database = args?.database;
         const requestedRowLimit = args?.row_limit;
 
-        if (!connection) return fail("'connection' alani zorunludur.");
-        if (!query) return fail("'query' alani zorunludur.");
+        if (!connection) return fail("'connection' field is required.");
+        if (!query) return fail("'query' field is required.");
 
         const connectionConfig = db.getConnectionConfig(connection);
         const validatedQuery = validateReadQuery(query);
@@ -130,8 +130,8 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
       case "execute_write": {
         const { connection, query } = args || {};
-        if (!connection) return fail("'connection' alani zorunludur.");
-        if (!query) return fail("'query' alani zorunludur.");
+        if (!connection) return fail("'connection' field is required.");
+        if (!query) return fail("'query' field is required.");
 
         const validatedQuery = validateWriteQuery(query);
         const meta = await db.runWrite(connection, validatedQuery);
@@ -140,9 +140,9 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
       case "execute_transaction": {
         const { connection, queries } = args || {};
-        if (!connection) return fail("'connection' alani zorunludur.");
+        if (!connection) return fail("'connection' field is required.");
         if (!Array.isArray(queries) || queries.length === 0) {
-          return fail("'queries' en az bir sorgu iceren bir dizi olmalidir.");
+          return fail("'queries' must be an array with at least one query.");
         }
 
         for (const q of queries) {
@@ -156,19 +156,19 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       case "suggest_query": {
         const { connection, query, reason } = args || {};
         return ok({
-          message: "MANUEL CALISTIRMA GEREKLI",
+          message: "MANUAL EXECUTION REQUIRED",
           connection,
-          reason: reason || "Yazma islemi",
+          reason: reason || "Write operation",
           query,
         });
       }
 
       default:
-        return fail(`Bilinmeyen arac: ${name}`);
+        return fail(`Unknown tool: ${name}`);
     }
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    return fail(`Hata: ${message}`);
+    return fail(`Error: ${message}`);
   }
 });
 
@@ -179,7 +179,7 @@ async function main() {
 
 main().catch((error) => {
   const message = error instanceof Error ? error.message : String(error);
-  console.error(`Sunucu baslatilamadi: ${message}`);
+  console.error(`Server failed to start: ${message}`);
   process.exit(1);
 });
 

@@ -27,7 +27,7 @@ export class DbManager {
     if (!cfg) {
       const available = this.getConnectionNames().join(", ");
       throw new Error(
-        `Baglanti bulunamadi: '${name}'. Mevcut baglantilar: ${available}`,
+        `Connection not found: '${name}'. Available connections: ${available}`,
       );
     }
     return cfg;
@@ -69,7 +69,7 @@ export class DbManager {
     const cfg = this.getConnectionConfig(connectionName);
     if (!cfg.read) {
       throw new Error(
-        `'${connectionName}' baglantisi read (okuma) izni vermiyor.`,
+        `'${connectionName}' connection does not allow read access.`,
       );
     }
   }
@@ -78,7 +78,7 @@ export class DbManager {
     const cfg = this.getConnectionConfig(connectionName);
     if (!cfg.write) {
       throw new Error(
-        `'${connectionName}' baglantisi write (yazma) izni vermiyor.`,
+        `'${connectionName}' connection does not allow write access.`,
       );
     }
   }
@@ -131,10 +131,10 @@ export class DbManager {
       try {
         await conn.rollback();
       } catch {
-        /* asil hatayi koruyoruz */
+        /* preserve the original error */
       }
       throw new Error(
-        `Transaction basarisiz, rollback yapildi: ${error.message}`,
+        `Transaction failed, rolled back: ${error.message}`,
       );
     } finally {
       conn.release();

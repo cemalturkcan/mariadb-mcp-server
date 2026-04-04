@@ -6,12 +6,12 @@ export function buildToolDefinitions(
   const tools = [
     {
       name: "list_connections",
-      description: "Tanimli MariaDB baglantilarini listeler.",
+      description: "Lists configured MariaDB connections.",
       inputSchema: { type: "object", properties: {} },
     },
     {
       name: "list_databases",
-      description: "Secilen baglantidaki veritabanlarini listeler.",
+      description: "Lists databases for the selected connection.",
       inputSchema: {
         type: "object",
         properties: {
@@ -22,7 +22,7 @@ export function buildToolDefinitions(
     },
     {
       name: "list_tables",
-      description: "Secilen baglantida tablolari listeler.",
+      description: "Lists tables for the selected connection.",
       inputSchema: {
         type: "object",
         properties: {
@@ -34,7 +34,7 @@ export function buildToolDefinitions(
     },
     {
       name: "describe_table",
-      description: "Bir tablonun kolon bilgilerini dondurur.",
+      description: "Returns column information for a table.",
       inputSchema: {
         type: "object",
         properties: {
@@ -48,7 +48,7 @@ export function buildToolDefinitions(
     {
       name: "execute_select",
       description:
-        "Salt-okunur SELECT/SHOW/DESCRIBE/EXPLAIN sorgusu calistirir. Satir limiti uygulanir.",
+        "Executes a read-only SELECT/SHOW/DESCRIBE/EXPLAIN query. Row limit is enforced.",
       inputSchema: {
         type: "object",
         properties: {
@@ -66,7 +66,7 @@ export function buildToolDefinitions(
     tools.push(
       {
         name: "execute_write",
-        description: `INSERT/UPDATE/DELETE/CREATE/ALTER/DROP vb. yazma sorgusu calistirir. Baglantilar: ${writableConnections.join(", ")}`,
+        description: `Executes a write query (INSERT/UPDATE/DELETE/CREATE/ALTER/DROP etc.). Connections: ${writableConnections.join(", ")}`,
         inputSchema: {
           type: "object",
           properties: {
@@ -78,7 +78,7 @@ export function buildToolDefinitions(
       },
       {
         name: "execute_transaction",
-        description: `Birden fazla yazma sorgusunu transaction icinde calistirir. Baglantilar: ${writableConnections.join(", ")}`,
+        description: `Executes multiple write queries within a transaction. Connections: ${writableConnections.join(", ")}`,
         inputSchema: {
           type: "object",
           properties: {
@@ -97,7 +97,7 @@ export function buildToolDefinitions(
 
   tools.push({
     name: "suggest_query",
-    description: "Manuel calistirilmasi gereken bir sorgu onerir.",
+    description: "Suggests a query that should be executed manually.",
     inputSchema: {
       type: "object",
       properties: {

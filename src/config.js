@@ -99,19 +99,19 @@ export function loadConfig() {
   const raw = rawConfig.connections || rawConfig.databases;
   if (!raw || typeof raw !== "object") {
     throw new Error(
-      "config.json icinde 'connections' (veya eski format 'databases') nesnesi olmalidir.",
+      "config.json must contain a 'connections' (or legacy 'databases') object.",
     );
   }
 
   const entries = Object.entries(raw);
   if (entries.length === 0) {
-    throw new Error("En az bir baglanti tanimlamalisiniz.");
+    throw new Error("You must define at least one connection.");
   }
 
   const connections = {};
   for (const [name, connection] of entries) {
     if (!connection || typeof connection !== "object") {
-      throw new Error(`'${name}' baglantisi gecersiz.`);
+      throw new Error(`'${name}' connection is invalid.`);
     }
 
     const normalized = normalizeConnection(connection);
@@ -122,7 +122,7 @@ export function loadConfig() {
       normalized.default_row_limit > normalized.max_row_limit
     ) {
       throw new Error(
-        `'${name}' icin default_row_limit, max_row_limit degerinden buyuk olamaz.`,
+        `default_row_limit for '${name}' cannot exceed max_row_limit.`,
       );
     }
 
